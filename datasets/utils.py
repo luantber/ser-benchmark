@@ -6,6 +6,34 @@ import matplotlib.pyplot as plt
 import librosa
 
 
+def collate_padded(batch):
+    """
+        return tensors_padded, lengths and targets
+    """
+    tensors, targets, lengths = [], [], []
+    for wave, label in batch:
+        tensors += [wave]
+        targets += [label]
+        lengths += [wave.shape[0]]
+
+    tensor_padded = torch.nn.utils.rnn.pad_sequence(tensors, batch_first=True)
+    return tensor_padded, torch.tensor(lengths), torch.tensor(targets)
+
+
+def collate_padded_no(batch):
+    """
+        return tensors_padded, lengths and targets
+    """
+    tensors, targets, lengths = [], [], []
+    for wave, label in batch:
+        tensors += [wave]
+        targets += [label]
+        lengths += [wave.shape[0]]
+
+    tensor_padded = torch.nn.utils.rnn.pad_sequence(tensors)
+    return tensor_padded, torch.tensor(lengths), torch.tensor(targets)
+
+
 # """"
 #   Transformations
 # """
@@ -46,7 +74,7 @@ import librosa
 
 
 # """
-#   Collate , etc 
+#   Collate , etc
 # """
 
 
@@ -61,28 +89,14 @@ import librosa
 
 # def collate_fn(batch):
 #     tensors, targets = [], []
-
-#     # Gather in lists, and encode labels as indices
-#     for wave, label in batch:
-#         tensors += [wave]
+#     for waveform, label in batch:
+#         tensors += [torch.nn.functional.pad(waveform, (  0 , 43000 - waveform.shape[1]  ) )]
 #         targets += [label]
 
-#     # Group the list of tensors into a batched tensor
-#     tensors = pad_sequence(tensors)
-#     targets = torch.tensor(targets)
+#     tensors = torch.stack(tensors)
+#     targets = torch.stack(targets)
 
 #     return tensors, targets
-
-def collate_fn(batch):
-    tensors, targets = [], []
-    for waveform, label in batch:
-        tensors += [torch.nn.functional.pad(waveform, (  0 , 43000 - waveform.shape[1]  ) )]
-        targets += [label]
-
-    tensors = torch.stack(tensors)
-    targets = torch.stack(targets)
-
-    return tensors, targets
 
 
 # def plot_spectrogram(spec, title=None, ylabel="freq_bin", aspect="auto", xmax=None):

@@ -17,59 +17,36 @@ class Ravdess(Dataset):
     def __post_init__(self):
         self.audio_labels = pd.read_csv(self.annotation_file)
         self.audio_cache = {}
-
-    # def __init__(self, annotations_file: str, audio_dir:str, transform=None):
-    #     self.annotation_file = annotations_file
-    #     self.audio_labels = pd.read_csv(self.annotation_file)
-    #     self.audio_dir = audio_dir
-    #     self.transform = transform
-
-    #     self.spec_cache = {}
-
-    # def set_transform(self, transform):
-    #     self.transform = transform
+        self.new_sample_rate = 8000
 
     def __len__(self):
         return len(self.audio_labels)
 
-    def get_sr(self):
-        audio_path = os.path.join(self.audio_dir, self.audio_labels.iloc[0, 0])
-        wave, sr = torchaudio.load(audio_path)
-        return sr
+    # def get_sr(self):
+    #     audio_path = os.path.join(self.audio_dir, self.audio_labels.iloc[0, 0])
+    #     wave, sr = torchaudio.load(audio_path)
+    #     return sr
 
     def __getitem__(self, idx):
         audio_path = os.path.join(self.audio_dir, self.audio_labels.iloc[idx, 0])
 
-        # wave, sr = torchaudio.load(audio_path)
-        # wave = torch.mean(wave, dim=0, keepdim=True)
-
+        # Audio Cache load
         if audio_path in self.audio_cache:
-            wave = self.audio_cache[audio_path]
-            # wave = torch.mean(wave, dim=0, keepdim=True)[0]
+            wave_resampled = self.audio_cache[audio_path]
         else:
-            wave, sr = torchaudio.load(audio_path)
-            wave = torch.mean(wave, dim=0, keepdim=True)
+            wave_stereo, sr = torchaudio.load(audio_path)
+            wave_mono = torch.mean(wave_stereo, dim=0, keepdim=True)
 
-            new_sample_rate = 8000
-            transform = torchaudio.transforms.Resample(orig_freq=self.get_sr(), new_freq=new_sample_rate)
-            wave = transform(wave)
+            resample_transform = torchaudio.transforms.Resample(
+                orig_freq=sr, new_freq=self.new_sample_rate
+            )
 
-            self.audio_cache[audio_path] = wave
+            wave_resampled = resample_transform(wave_mono)
+            self.audio_cache[audio_path] = wave_resampled
 
-        #     # only supporting over Spectrogram
-        #     if self.transform:
-        #         if audio_path in self.spec_cache:
-        #             wave = self.spec_cache[audio_path]
-        #         else:
-        #             spec = utils.melspectrogram(wave, sr)
-        #             wave = utils.powertodb(spec, sr)
-        #             self.spec_cache[audio_path] = wave
-
+        # Get Label
         label = torch.tensor(self.audio_labels.iloc[idx, 1])
-        # print(type(label))
 
-        #     if self.transform:
-        #         for t in self.transform:
-        #             wave = t(wave, sr)
+        unfolded = wave_resampled[0].unfold(0, self.new_sample_rate, self.new_sample_rate // 2)
 
-        return wave, label
+        return unfolded, label
