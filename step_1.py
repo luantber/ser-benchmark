@@ -1,8 +1,8 @@
 from datasets.ravdess import Ravdess
-from datasets.utils import collate_padded
+from datasets.utils import collate_padded_no
 
-from models.cnn1d import CNN1D
-# from models.cnn1dfast import CNN1DFast
+# from models.cnn1d import CNN1D
+from models.cnn1dfast import CNN1DFast
 
 import mef
 
@@ -15,10 +15,10 @@ dataset = Ravdess("datasets/ravdess/train/train.csv", "datasets/ravdess/train/au
 
 settings = {
     "cnn1d": mef.Setting(
-        CNN1D,
+        CNN1DFast,
         batch_size=128,
-        epochs=250,
-        dataloader_args={"collate_fn": collate_padded, "num_workers": 3},
+        epochs=1250,
+        dataloader_args={"collate_fn": collate_padded_no, "num_workers": 4},
     ),
 }
 

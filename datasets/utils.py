@@ -3,7 +3,7 @@ from torchaudio import transforms
 from torchaudio.transforms import MelSpectrogram
 from torchvision.transforms import RandomCrop, CenterCrop, Pad
 import matplotlib.pyplot as plt
-import librosa
+# import librosa
 
 
 def collate_padded(batch):
