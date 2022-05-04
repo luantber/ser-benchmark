@@ -14,7 +14,8 @@ dataset = Ravdess("datasets/ravdess/train/train.csv", "datasets/ravdess/train/au
 
 size_train = int(len(dataset) * 0.75)
 size_test = len(dataset) - size_train
-args = {"collate_fn": collate_padded_no}
+args = {"collate_fn": collate_padded_no, "num_workers":0}
+
 train, test = torch.utils.data.random_split(
     dataset,
     [size_train, size_test],
@@ -32,19 +33,26 @@ val_loader = (
     if test
     else None
 )
-logger = TensorBoardLogger("tb_logs", name="test")
+# logger = TensorBoardLogger("tb_logs", name="test")
 
-profiler = PyTorchProfiler(with_stack=True)
+# from torch.profiler import schedule
+
+# my_schedule = schedule(
+#     skip_first=10,
+#     wait=1,
+#     warmup=1,
+    # active=10)
+
+# profiler = PyTorchProfiler(with_stack=True,schedule=my_schedule)
 trainer = Trainer(
             gpus=1,
             max_epochs=200,
             enable_model_summary=False,
             enable_progress_bar=True,
             log_every_n_steps=2,
-            logger=logger,
-            profiler="pytorch"
+            # logger=logger,
+            # profiler=profiler
             # progress_bar_refresh_rate=20,
         )
-
         # Train the model
 trainer.fit(model, train_loader, val_dataloaders=val_loader)

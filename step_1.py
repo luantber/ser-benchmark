@@ -18,7 +18,7 @@ settings = {
         CNN1DFast,
         batch_size=128,
         epochs=1500,
-        dataloader_args={"collate_fn": collate_padded_no, "num_workers": 4},
+        dataloader_args={"collate_fn": collate_padded_no},
     ),
 }
 

@@ -18,8 +18,13 @@ dataset = Ravdess("datasets/ravdess/train/train.csv", "datasets/ravdess/train/au
 loader = DataLoader(dataset,batch_size=5,collate_fn=collate_padded_no)
 
 for i in range(600):
+    # print(i)
     for batch in loader:
-        print( batch[0].shape )
+        a = batch[0].shape
+
+
+
+        # print( batch[0].shape )
 
         # break
 
