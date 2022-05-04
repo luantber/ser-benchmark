@@ -41,15 +41,23 @@ class CNN1DFast(Model):
 
         x = self.conv1(step)
         x = F.relu(x)
+        x = F.dropout(x,0.15)
+
         x = self.pool1(x)
         x = self.conv2(x)
         x = F.relu(x)
+        x = F.dropout(x,0.15)
+
         x = self.pool2(x)
         x = self.conv3(x)
         x = F.relu(x)
+        x = F.dropout(x,0.15)
+
         x = self.pool3(x)
         x = self.conv4(x)
         x = F.relu(x)
+        x = F.dropout(x,0.15)
+        
         x = self.pool4(x)
         x = F.avg_pool1d(x, x.shape[-1])
         x = x.view(batch_size,-1)

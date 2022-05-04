@@ -16,8 +16,13 @@ class Ravdess(Dataset):
 
     def __post_init__(self):
         self.audio_labels = pd.read_csv(self.annotation_file)
+        self.audio_filenames = self.audio_labels["file"].to_numpy()
+        self.audio_emotions = self.audio_labels["emotion"].to_numpy()
+
         self.audio_cache = {}
         self.new_sample_rate = 8000
+
+        # breakpoint()
 
     def __len__(self):
         return len(self.audio_labels)
@@ -28,11 +33,12 @@ class Ravdess(Dataset):
     #     return sr
 
     def __getitem__(self, idx):
-        audio_path = os.path.join(self.audio_dir, self.audio_labels.iloc[idx, 0])
-
+        audio_path = os.path.join(self.audio_dir, self.audio_filenames[idx] )
+        
         # Audio Cache load
         if audio_path in self.audio_cache:
             wave_resampled = self.audio_cache[audio_path]
+            # print(audio_path,"cache")
         else:
             wave_stereo, sr = torchaudio.load(audio_path)
             wave_mono = torch.mean(wave_stereo, dim=0, keepdim=True)
@@ -43,10 +49,11 @@ class Ravdess(Dataset):
 
             wave_resampled = resample_transform(wave_mono)
             self.audio_cache[audio_path] = wave_resampled
+            # print(audio_path,"load")
 
         # Get Label
-        label = torch.tensor(self.audio_labels.iloc[idx, 1])
-
+        label = torch.tensor(self.audio_emotions[idx])
+        #dimension,size,step
         unfolded = wave_resampled[0].unfold(0, self.new_sample_rate, self.new_sample_rate // 2)
 
         return unfolded, label
