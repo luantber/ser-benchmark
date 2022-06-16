@@ -13,7 +13,7 @@ class CNN1DFast(Model):
 
         n_input=1
         n_output=8
-        stride=16
+        stride=4
         n_channel=32
 
         self.conv1 = nn.Conv1d(n_input, n_channel, kernel_size=80, stride=stride)
@@ -40,11 +40,13 @@ class CNN1DFast(Model):
         step = step.view( batch_size,1,-1)
 
         x = self.conv1(step)
+        x = self.bn1(x)
         x = F.relu(x)
         x = F.dropout(x,0.15)
 
         x = self.pool1(x)
         x = self.conv2(x)
+        
         x = F.relu(x)
         x = F.dropout(x,0.15)
 
@@ -59,6 +61,7 @@ class CNN1DFast(Model):
         x = F.dropout(x,0.15)
         
         x = self.pool4(x)
+        
         x = F.avg_pool1d(x, x.shape[-1])
         x = x.view(batch_size,-1)
         x = self.fc1(x)

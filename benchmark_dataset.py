@@ -15,7 +15,7 @@ seed = 42
 dataset = Ravdess("datasets/ravdess/train/train.csv", "datasets/ravdess/train/audios")
 
 
-loader = DataLoader(dataset,batch_size=5,collate_fn=collate_padded_no)
+loader = DataLoader(dataset,batch_size=128,collate_fn=collate_padded_no)
 
 for i in range(600):
     # print(i)

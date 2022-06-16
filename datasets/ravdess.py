@@ -54,6 +54,6 @@ class Ravdess(Dataset):
         # Get Label
         label = torch.tensor(self.audio_emotions[idx])
         #dimension,size,step
-        unfolded = wave_resampled[0].unfold(0, self.new_sample_rate, self.new_sample_rate // 2)
+        unfolded = wave_resampled[0].unfold(0, int(self.new_sample_rate * 1.5) , self.new_sample_rate // 3 )
 
         return unfolded, label
